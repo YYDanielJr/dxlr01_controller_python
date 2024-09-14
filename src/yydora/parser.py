@@ -30,3 +30,10 @@ def yydoraParser(text: str) -> bytes:
 
 def yydoraUnparser(text: bytes) -> str:
     text = text.decode()
+    packageLength = int(text[0:3])
+    packageType = int(text[7])
+    packageNumber = int(text[8:12])
+    longPackageNumber = int(text[12:16])
+    mainTextSize = packageLength - 17
+    mainText = text[16:(16 + mainTextSize)]
+    return mainText
