@@ -27,3 +27,6 @@ def yydoraParser(text: str) -> bytes:
         package = packageStr.encode()
         package = package + str(binascii.crc32(package)).encode()
         return package
+
+def yydoraUnparser(text: bytes) -> str:
+    text = text.decode()
