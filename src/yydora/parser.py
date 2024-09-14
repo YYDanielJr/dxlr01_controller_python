@@ -31,9 +31,17 @@ def yydoraParser(text: str) -> bytes:
 def yydoraUnparser(text: bytes) -> str:
     text = text.decode()
     packageLength = int(text[0:3])
-    packageType = int(text[7])
-    packageNumber = int(text[8:12])
-    longPackageNumber = int(text[12:16])
-    mainTextSize = packageLength - 17
-    mainText = text[16:(16 + mainTextSize)]
-    return mainText
+    # 验算crc32
+    crcPart = text[packageLength + 3:]
+    packagePart = text[:packageLength + 3]  # 包括最开头的数字部分
+    if int(crcPart) == binascii.crc32(packagePart.encode()):
+        # 解包
+        packageType = int(text[7])
+        packageNumber = int(text[8:12])
+        longPackageNumber = int(text[12:16])
+        mainTextSize = packageLength - 17
+        mainText = text[16:(16 + mainTextSize)]
+        return mainText
+
+
+
