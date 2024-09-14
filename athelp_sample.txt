@@ -1,0 +1,31 @@
+===================================
+
+LoRa Parameter:
+
++VERSION=V2.2.0
+
+MODE:0
+
+LEVEL:7 >> 13020.833984bps
+
+SLEEP:2
+
+Frequency:433000000hz >> 00
+
+MAC:ff,ff
+
+Bandwidth:0
+
+Spreading Factor:5
+
+Coding rate:2
+
+CRC:0(false)
+
+Preamble:8
+
+IQ:0(false)
+
+Power:22dBm
+
+===================================
