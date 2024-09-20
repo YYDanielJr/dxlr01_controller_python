@@ -14,6 +14,7 @@ import logging
 import threading
 import sqlite3
 import json
+from yydora.parser import *
 
 logger = logging.getLogger(__name__)
 locker = threading.Lock()
@@ -195,49 +196,60 @@ class dxlr01:
                 loadList.append(f'AT+LEVEL{profile.get("level")}\r\n')
             if profile.get("sleep") != None:
                 loadList.append(f'AT+SLEEP{profile.get("sleep")}\r\n')
-        
+
         if loadList:
             if self.runATCommands(loadList) == 0:
                 print("Load profiles successfully. ")
-            
-            
-    def writeContinuously(self):
-        while True:
-            locker.acquire()
-            self.ser.write(b"Sending message from Python client.\r\n")
-            print("A message has sent.")
-            if locker.locked():
-                locker.release()
-            sleep(2)
-    
-    def readContinuously(self):
-        sqliteConnection = sqlite3.connect('database.db')
-        sqliteCur = sqliteConnection.cursor()
-        sqliteCur.execute("CREATE TABLE IF NOT EXISTS test(id INTEGER PRIMARY KEY,message TEXT);")
-        sqliteConnection.commit()
-        # sqliteCur.execute("select * from test order by id desc limit 0,1;")
-        # sqliteConnection.commit()
+
+    def send(self, text: str):
+        self.ser.write(yydoraParser(text) + "\r\n")
+
+    def readline(self) -> str:
+        recv = self.ser.readline()
+        text = yydoraUnparser(recv)
+        if not text:
+            pass
+            # 后期再修改
+        else:
+            return text
+
+    # def writeContinuously(self):
+    #     while True:
+    #         locker.acquire()
+    #         self.ser.write(b"Sending message from Python client.\r\n")
+    #         print("A message has sent.")
+    #         if locker.locked():
+    #             locker.release()
+    #         sleep(2)
+
+    # def readContinuously(self):
+    #     sqliteConnection = sqlite3.connect('database.db')
+    #     sqliteCur = sqliteConnection.cursor()
+    #     sqliteCur.execute("CREATE TABLE IF NOT EXISTS test(id INTEGER PRIMARY KEY,message TEXT);")
+    #     sqliteConnection.commit()
+    #     # sqliteCur.execute("select * from test order by id desc limit 0,1;")
+    #     # sqliteConnection.commit()
         
-        receiveCount = 100
-        while True:
-            locker.acquire()
-            isReadable = self.ser.in_waiting
-            if locker.locked():
-                locker.release()
-            if isReadable > 0:
-                try:
-                    print("*****Read ONE MESSAGE*****")
-                    locker.acquire()
-                    str = self.ser.readline()
-                    if locker.locked():
-                        locker.release()
-                    if str:
-                        receiveCount = receiveCount + 1
-                        str = str.decode('utf-8')
-                        sqliteCur.execute('insert into test values({}, \"{}\");'.format(receiveCount, str))
-                        sqliteConnection.commit()
-                        print("A message has been received and stored in database.")
-                except:
-                    continue
-            else:
-                sleep(0.1)
+    #     receiveCount = 100
+    #     while True:
+    #         locker.acquire()
+    #         isReadable = self.ser.in_waiting
+    #         if locker.locked():
+    #             locker.release()
+    #         if isReadable > 0:
+    #             try:
+    #                 print("*****Read ONE MESSAGE*****")
+    #                 locker.acquire()
+    #                 str = self.ser.readline()
+    #                 if locker.locked():
+    #                     locker.release()
+    #                 if str:
+    #                     receiveCount = receiveCount + 1
+    #                     str = str.decode('utf-8')
+    #                     sqliteCur.execute('insert into test values({}, \"{}\");'.format(receiveCount, str))
+    #                     sqliteConnection.commit()
+    #                     print("A message has been received and stored in database.")
+    #             except:
+    #                 continue
+    #         else:
+    #             sleep(0.1)
