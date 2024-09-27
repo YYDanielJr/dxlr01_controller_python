@@ -201,12 +201,12 @@ class dxlr01:
             if self.runATCommands(loadList) == 0:
                 print("Load profiles successfully. ")
 
-    def send(self, text: str):
-        self.ser.write(yydoraParser(text) + "\r\n")
+    def write(self, text: str):
+        self.ser.write(YYDoraParser.yydoraParser(text) + "\r\n")
 
     def readline(self) -> str:
         recv = self.ser.readline()
-        text = yydoraUnparser(recv)
+        text = YYDoraParser.yydoraUnparser(recv)
         if not text:
             pass
             # 后期再修改
