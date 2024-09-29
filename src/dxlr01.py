@@ -204,14 +204,14 @@ class dxlr01:
     def write(self, text: str):
         self.ser.write(YYDoraParser.yydoraParser(text) + "\r\n")
 
-    def readline(self) -> str:
+    def readline(self) -> ReceivedPackage:
         recv = self.ser.readline()
-        text = YYDoraParser.yydoraUnparser(recv)
-        if not text:    # 接收到的内容为空，意味着传输上出现了问题导致无法解包，需要要求重传
-            pass
-            # 后期再修改
-        else:
-            return text
+        return YYDoraParser.yydoraUnparser(recv)
+        # if not text:    # 接收到的内容为空，意味着传输上出现了问题导致无法解包，需要要求重传
+        #     pass
+        #     # 后期再修改
+        # else:
+        #     return text
 
     # def writeContinuously(self):
     #     while True:

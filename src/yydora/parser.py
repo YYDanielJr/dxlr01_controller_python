@@ -3,6 +3,33 @@ import binascii
 packageCutLength = 512
 packageCount = 0
 
+class ReceivedPackage:
+    def __init__(self, valid: bool, device: int, type: int, number: int, longPackageNumber: int, text: str):
+        self.valid = valid
+        self.targetDevice = device
+        self.packageType = type
+        self.packageNumber = number
+        self.longPackageNumber = longPackageNumber
+        self.text = text
+
+    def isValid(self) -> bool:
+        return self.valid
+
+    def getTargetDevice(self) -> int:
+        return self.targetDevice
+
+    def getPackageType(self) -> int:
+        return self.packageType
+
+    def getPackageNumber(self) -> int:
+        return self.packageNumber
+
+    def getLongPackageNumber(self) -> int:
+        return self.longPackageNumber
+
+    def getText(self) -> str:
+        return self.text
+
 class YYDoraParser:
     # 生成报文编号
     def getPackageCount(self) -> int:
@@ -15,21 +42,20 @@ class YYDoraParser:
     def generateShortPackage(self, text: str) -> str:
         headMagicNumber = "1145"
         tailMagicNumber = "1919"
-        ret = headMagicNumber
+        ret = headMagicNumber + "0000"
         ret = ret + "0"
         ret = ret + "{:0>4d}".format(self.getPackageCount()) + "0000" + text + tailMagicNumber
         return ret
 
-
     def yydoraConfirmParser(self, packageNumber: int, longPackageNumber: int) -> bytes:
-        package = "11455"
+        package = "114500005"
         packageNumberStr = "{:0>3d}".format(packageNumber)
         longPackageNumberStr = "{:0>3d}".format(longPackageNumber)
         package += packageNumberStr + longPackageNumberStr + "1919"
         return package.encode()
 
     def yydoraResendRequestParser(self, packageNumber: int, longPackageNumber: int) -> bytes:
-        package = "11452"
+        package = "114500002"
         packageNumberStr = "{:0>3d}".format(packageNumber)
         longPackageNumberStr = "{:0>3d}".format(longPackageNumber)
         package += packageNumberStr + longPackageNumberStr + "1919"
@@ -44,7 +70,7 @@ class YYDoraParser:
             package = package + str(binascii.crc32(package)).encode()
             return package
 
-    def yydoraUnparser(self, text: bytes) -> str:
+    def yydoraUnparser(self, text: bytes) -> ReceivedPackage:
         text = text.decode()
         packageLength = int(text[0:3])
         # 验算crc32
@@ -52,11 +78,12 @@ class YYDoraParser:
         packagePart = text[:packageLength + 3]  # 包括最开头的数字部分
         if int(crcPart) == binascii.crc32(packagePart.encode()):
             # 解包
-            packageType = int(text[7])
-            packageNumber = int(text[8:12])
-            longPackageNumber = int(text[12:16])
-            mainTextSize = packageLength - 17
-            mainText = text[16:(16 + mainTextSize)]
-            return mainText
+            targetDevice = int(text[7:11])
+            packageType = int(text[11])
+            packageNumber = int(text[12:16])
+            longPackageNumber = int(text[16:20])
+            mainTextSize = packageLength - 21
+            mainText = text[20:(20 + mainTextSize)]
+            return ReceivedPackage(True, packageType, packageNumber, longPackageNumber, mainText)
         else:
-            return str()
+            return ReceivedPackage(False, 0, 0, 0, "")
