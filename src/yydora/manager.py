@@ -66,6 +66,9 @@ class YYDoraMessageManager:
     def getReceived(self) -> str:
         self.receiveMutex.acquire()
         if self.receiveQueue.empty():
+            self.receiveMutex.release()
             return str()
         else:
-            return self.receiveQueue.get()
+            ret = self.receiveQueue.get()
+            self.receiveMutex.release()
+            return ret
