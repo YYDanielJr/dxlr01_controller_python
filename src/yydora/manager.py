@@ -47,7 +47,7 @@ class YYDoraMessageManager:
             recv = self.loraModule.readline()
             if recv.isValid():
                 # 只对非重传报文发送重传请求，正常发送的报文和接收到的重传报文直接入队
-                if recv.getPackageType() == 0 and recv.getPackageNumber() == self.receiveBufferQueue[0].getPackageNumber() + 1 or recv.getPackageType() == 3:
+                if recv.getPackageType() == 0 and (recv.getPackageNumber() == self.receiveBufferQueue[0].getPackageNumber() + 1 or self.receiveBufferQueue[0].getPackageNumber() == 9999 and recv.getPackageNumber() == 0) or recv.getPackageType() == 3:
                     self.receiveMutex.acquire()
                     self.receiveQueue.put(recv)
                     self.receiveMutex.release()
@@ -55,9 +55,11 @@ class YYDoraMessageManager:
                         self.receiveBufferQueue.get()
                         self.receiveBufferQueue.put(recv)
                 else:
+                    if recv.getPackageNumber() - self.receiveBufferQueue[0].getPackageNumber() <= 0:
+                        currentPackageNumber = recv.getPackageNumber() + 9999
                     lastPackageNumber = self.receiveBufferQueue[0].getPackageNumber()
-                    for i in range(lastPackageNumber + 1, recv.getPackageNumber()):
-                        self.resend(YYDoraParser.yydoraResendRequestParser(i, recv.getLongPackageNumber()))
+                    for i in range(lastPackageNumber + 1, currentPackageNumber):
+                        self.resend(YYDoraParser.yydoraResendRequestParser(i % 9999, recv.getLongPackageNumber()))
 
             sleep(0.05)
 
