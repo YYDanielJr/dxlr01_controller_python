@@ -49,15 +49,15 @@ class YYDoraParser:
 
     def yydoraConfirmParser(self, packageNumber: int, longPackageNumber: int) -> bytes:
         package = "114500005"
-        packageNumberStr = "{:0>3d}".format(packageNumber)
-        longPackageNumberStr = "{:0>3d}".format(longPackageNumber)
+        packageNumberStr = "{:0>4d}".format(packageNumber)
+        longPackageNumberStr = "{:0>4d}".format(longPackageNumber)
         package += packageNumberStr + longPackageNumberStr + "1919"
         return package.encode()
 
     def yydoraResendRequestParser(self, packageNumber: int, longPackageNumber: int) -> bytes:
         package = "114500002"
-        packageNumberStr = "{:0>3d}".format(packageNumber)
-        longPackageNumberStr = "{:0>3d}".format(longPackageNumber)
+        packageNumberStr = "{:0>4d}".format(packageNumber)
+        longPackageNumberStr = "{:0>4d}".format(longPackageNumber)
         package += packageNumberStr + longPackageNumberStr + "1919"
         return package.encode()
 
