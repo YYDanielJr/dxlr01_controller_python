@@ -15,7 +15,7 @@ from src.yydora.parser import *
 from src.yydora.manager import *
 
 def main() -> int:
-    loraModule = dxlr01('com8', 9600)
+    loraModule = dxlr01('com8', 9600, False)
     manager = YYDoraMessageManager(loraModule)
     # # writeThread = threading.Thread(target=loraModule.writeContinuously, name='continuouslyWrite')
     # # readThread = threading.Thread(target=loraModule.readContinuously, name='continuouslyRead')

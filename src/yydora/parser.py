@@ -72,23 +72,26 @@ def yydoraParser(text: str) -> bytes:
 
 def yydoraUnparser(text: bytes) -> ReceivedPackage:
     text = text.decode()
-    if text.startswith("\r\n"):
-        text = text[2:]
+    try:
+        if text.startswith("\r\n"):
+            text = text[2:]
     ###
     # print(text)
     ###
-    packageLength = int(text[0:3])
+        packageLength = int(text[0:3])
     # 验算crc32
-    crcPart = text[packageLength + 3:]
-    packagePart = text[:packageLength + 3]  # 包括最开头的数字部分
-    if int(crcPart) == binascii.crc32(packagePart.encode()):
+        crcPart = text[packageLength + 3:]
+        packagePart = text[:packageLength + 3]  # 包括最开头的数字部分
+        if int(crcPart) == binascii.crc32(packagePart.encode()):
         # 解包
-        targetDevice = int(text[7:11])
-        packageType = int(text[11])
-        packageNumber = int(text[12:16])
-        longPackageNumber = int(text[16:20])
-        mainTextSize = packageLength - 21
-        mainText = text[20:(20 + mainTextSize)]
-        return ReceivedPackage(True, device=targetDevice, type=packageType, number=packageNumber, longPackageNumber=longPackageNumber, text=mainText)
-    else:
+            targetDevice = int(text[7:11])
+            packageType = int(text[11])
+            packageNumber = int(text[12:16])
+            longPackageNumber = int(text[16:20])
+            mainTextSize = packageLength - 21
+            mainText = text[20:(20 + mainTextSize)]
+            return ReceivedPackage(True, device=targetDevice, type=packageType, number=packageNumber, longPackageNumber=longPackageNumber, text=mainText)
+        else:
+            return ReceivedPackage(False, 0, 0, 0, "")
+    except UnicodeDecodeError:
         return ReceivedPackage(False, 0, 0, 0, "")

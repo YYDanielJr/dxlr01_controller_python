@@ -39,24 +39,25 @@ class dxlr01:
             print("Received bytes when trying to +++, but not a standard reply: " + recv.encode())
             return False
     
-    def __init__(self, serialPath, baudRate):
+    def __init__(self, serialPath, baudRate, test = True):
         # 设置串口模式为'\r\n'结尾
 
         self.serialPath = serialPath
         self.baudrate = baudRate
         self.ser = serial.Serial(serialPath, baudRate)
+        if test:
         # self.ser.readline = lambda: self.ser.read_until(b'\r\n').strip().decode()
-        if self.ser.is_open:
-            logger.info("Successfully opened serial on {} with baudrate {}. Now we will test if the dxlr01 module is available for use.".format(serialPath, baudRate))
-            if self.testModule():
-                logger.info("Module test passed. This module is ready to use.")
-                print("Module test passed. This module is ready to use.\n")
-                sleep(0.1)
-                self.ser.readline() # 把重新启动时向串口发送的Power on过滤掉
+            if self.ser.is_open:
+                logger.info("Successfully opened serial on {} with baudrate {}. Now we will test if the dxlr01 module is available for use.".format(serialPath, baudRate))
+                if self.testModule():
+                    logger.info("Module test passed. This module is ready to use.")
+                    print("Module test passed. This module is ready to use.\n")
+                    sleep(0.1)
+                    self.ser.readline() # 把重新启动时向串口发送的Power on过滤掉
+                else:
+                    logger.error("Module test failed. Please check if this module is correct.")
             else:
-                logger.error("Module test failed. Please check if this module is correct.")
-        else:
-            logger.error("Unable to open serial on {}".format(serialPath))
+                logger.error("Unable to open serial on {}".format(serialPath))
             
             
     ##########
@@ -210,12 +211,15 @@ class dxlr01:
     def readline(self) -> ReceivedPackage:
         recv = b''
         while True:
-            recv = self.ser.readline()
-            recvstr = recv.decode()
-            if recvstr == "\r\n":
+            try:
+                recv = self.ser.readline()
+                recvstr = recv.decode()
+                if recvstr == "\r\n":
+                    continue
+                else:
+                    break
+            except UnicodeDecodeError:
                 continue
-            else:
-                break
         return yydoraUnparser(recv)
         # if not text:    # 接收到的内容为空，意味着传输上出现了问题导致无法解包，需要要求重传
         #     pass
