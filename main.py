@@ -8,13 +8,15 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 '''
 
 import sys
-# from src.dxlr01 import *
+from src.dxlr01 import *
 import threading
 import json
 from src.yydora.parser import *
+from src.yydora.manager import *
 
 def main() -> int:
-    # loraModule = dxlr01('/dev/ttyS7', 9600)
+    loraModule = dxlr01('com8', 9600)
+    manager = YYDoraMessageManager(loraModule)
     # # writeThread = threading.Thread(target=loraModule.writeContinuously, name='continuouslyWrite')
     # # readThread = threading.Thread(target=loraModule.readContinuously, name='continuouslyRead')
     # # writeThread.start()
@@ -28,9 +30,12 @@ def main() -> int:
     # print(f"\tAverage time: {res} s.\n")
     # print("*******************************")
 
-    teststr = "Now we will have a test on long strings. We will test if the time is affordable when calculating crc32 of a long string. "
-    print(yydoraParser(teststr).decode())
-    print(yydoraUnparser(yydoraParser(teststr)))
+    # teststr = "Now we will have a test on long strings. We will test if the time is affordable when calculating crc32 of a long string. "
+    # print(yydoraParser(teststr).decode())
+    # print(yydoraUnparser(yydoraParser(teststr)))
+    while True:
+        print(manager.getReceived())
+        sleep(1)
 
 if __name__ == '__main__':
     main()

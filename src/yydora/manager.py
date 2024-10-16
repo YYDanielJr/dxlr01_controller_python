@@ -44,23 +44,23 @@ class YYDoraMessageManager:
 
     def __receive__(self):
         while True:
+            print("***receiving***")
             recv = self.loraModule.readline()
             if recv.isValid():
                 # 只对非重传报文发送重传请求，正常发送的报文和接收到的重传报文直接入队
-                if recv.getPackageType() == 0 and (recv.getPackageNumber() == self.receiveBufferQueue[0].getPackageNumber() + 1 or self.receiveBufferQueue[0].getPackageNumber() == 9999 and recv.getPackageNumber() == 0) or recv.getPackageType() == 3:
+                if recv.getPackageType() == 0 and (self.receiveBufferQueue.empty() or recv.getPackageNumber() == self.receiveBufferQueue.queue[0].getPackageNumber() + 1 or self.receiveBufferQueue.queue[0].getPackageNumber() == 9999 and recv.getPackageNumber() == 0) or recv.getPackageType() == 3:
                     self.receiveMutex.acquire()
                     self.receiveQueue.put(recv)
                     self.receiveMutex.release()
-                    if recv.getPackageType() == 0:
+                    if recv.getPackageType() == 0 and (not self.receiveBufferQueue.empty()):
                         self.receiveBufferQueue.get()
-                        self.receiveBufferQueue.put(recv)
+                    self.receiveBufferQueue.put(recv)
                 else:
                     if recv.getPackageNumber() - self.receiveBufferQueue[0].getPackageNumber() <= 0:
                         currentPackageNumber = recv.getPackageNumber() + 9999
                     lastPackageNumber = self.receiveBufferQueue[0].getPackageNumber()
                     for i in range(lastPackageNumber + 1, currentPackageNumber):
-                        self.resend(YYDoraParser.yydoraResendRequestParser(i % 9999, recv.getLongPackageNumber()))
-
+                        self.resend(yydoraResendRequestParser(i % 9999, recv.getLongPackageNumber()))
             sleep(0.05)
 
     def getReceived(self) -> str:
@@ -71,4 +71,4 @@ class YYDoraMessageManager:
         else:
             ret = self.receiveQueue.get()
             self.receiveMutex.release()
-            return ret
+            return ret.getText()

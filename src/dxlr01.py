@@ -14,7 +14,7 @@ import logging
 import threading
 import sqlite3
 import json
-from yydora.parser import *
+from src.yydora.parser import *
 
 logger = logging.getLogger(__name__)
 locker = threading.Lock()
@@ -31,18 +31,21 @@ class dxlr01:
             if recv == b'Exit AT\r\n':
                 return True
             else:
-                print("Received bytes when trying to +++, but not a standard reply: " + recv.decode())
+                print("Received bytes when trying to +++, but not a standard reply: " + recv.encode())
                 return False
         elif recv == b'Exit AT\r\n':
             return True
         else:
-            print("Received bytes when trying to +++, but not a standard reply: " + recv.decode())
+            print("Received bytes when trying to +++, but not a standard reply: " + recv.encode())
             return False
     
     def __init__(self, serialPath, baudRate):
+        # 设置串口模式为'\r\n'结尾
+
         self.serialPath = serialPath
         self.baudrate = baudRate
         self.ser = serial.Serial(serialPath, baudRate)
+        # self.ser.readline = lambda: self.ser.read_until(b'\r\n').strip().decode()
         if self.ser.is_open:
             logger.info("Successfully opened serial on {} with baudrate {}. Now we will test if the dxlr01 module is available for use.".format(serialPath, baudRate))
             if self.testModule():
@@ -202,11 +205,18 @@ class dxlr01:
                 print("Load profiles successfully. ")
 
     def write(self, text: str):
-        self.ser.write(YYDoraParser.yydoraParser(text) + "\r\n")
+        self.ser.write(yydoraParser(text) + "\r\n")
 
     def readline(self) -> ReceivedPackage:
-        recv = self.ser.readline()
-        return YYDoraParser.yydoraUnparser(recv)
+        recv = b''
+        while True:
+            recv = self.ser.readline()
+            recvstr = recv.decode()
+            if recvstr == "\r\n":
+                continue
+            else:
+                break
+        return yydoraUnparser(recv)
         # if not text:    # 接收到的内容为空，意味着传输上出现了问题导致无法解包，需要要求重传
         #     pass
         #     # 后期再修改
