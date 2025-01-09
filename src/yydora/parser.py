@@ -30,6 +30,19 @@ class ReceivedPackage:
     def getText(self) -> str:
         return self.text
 
+class TextPackage:
+    def __init__(self, text: str, targetDevice: int):
+        self.text = text
+        self.targetDevice = targetDevice
+
+    def getDevice(self) -> int:
+        return self.targetDevice
+
+    def __str__(self) -> int:
+        return self.text
+
+    def getText(self) -> int:
+        return self.text
 
    # 生成报文编号
 def getPackageCount() -> int:
