@@ -1,5 +1,5 @@
 from time import sleep
-from mySqlite import *
+from src.mySqlite import *
 import threading
 import datetime
 import re
