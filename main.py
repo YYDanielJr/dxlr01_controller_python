@@ -13,10 +13,12 @@ import threading
 import json
 from src.yydora.parser import *
 from src.yydora.manager import *
+from src.data_processor import DataProcessor
 
 def main() -> int:
     loraModule = dxlr01('com8', 9600, False)
     manager = YYDoraMessageManager(loraModule)
+    dataProcessor = DataProcessor()
     # # writeThread = threading.Thread(target=loraModule.writeContinuously, name='continuouslyWrite')
     # # readThread = threading.Thread(target=loraModule.readContinuously, name='continuouslyRead')
     # # writeThread.start()
@@ -34,7 +36,8 @@ def main() -> int:
     # print(yydoraParser(teststr).decode())
     # print(yydoraUnparser(yydoraParser(teststr)))
     while True:
-        print(manager.getReceived())
+        text = manager.getReceived()
+        dataProcessor.processData(text)
         sleep(1)
 
 if __name__ == '__main__':
