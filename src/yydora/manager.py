@@ -44,7 +44,7 @@ class YYDoraMessageManager:
 
     def __receive__(self):
         while True:
-            print("***receiving***")
+            # print("***receiving***")
             recv = self.loraModule.readline()
             if recv.isValid():
                 # 只对非重传报文发送重传请求，正常发送的报文和接收到的重传报文直接入队

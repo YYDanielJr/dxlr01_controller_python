@@ -4,7 +4,7 @@ import time
 
 class SqliteConnector:
     def __init__(self):
-        self.conn = sqlite3.connect("historyData.db")
+        self.conn = sqlite3.connect("./db/historyData.db")
         self.cur = self.conn.cursor()
         self.cur.execute('''create table if not exists last24h
                          (time real primary key not null,

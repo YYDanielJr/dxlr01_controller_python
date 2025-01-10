@@ -48,7 +48,7 @@ class DataProcessor:
             # 分针归0或30自动保存长期数据
             if (curTime.minute == 0 or curTime.minute == 30) and curTime.second == 0:
                 with self.sqliteLock:
-                    cursor = self.sqliteConnector.get30minData()
+                    cursor = self.sqliteConnector.get30minData(curTime.timestamp())
                 temp = 0.0
                 humi = 0.0
                 count = 0
