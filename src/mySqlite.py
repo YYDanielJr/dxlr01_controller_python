@@ -24,6 +24,7 @@ class SqliteConnector:
         self.cur.execute('''insert into last60min values
                     (?, ?, ?);''', curDateTime.timestamp(), temp, humi)
         self.conn.commit()
+        print("向last60min插入数据完成。")
 
         # 获取表中项目的数量
         self.cur.execute('SELECT COUNT(*) FROM last60min;')
@@ -45,4 +46,14 @@ class SqliteConnector:
         return self.cur.execute("select * from last60min;")
 
     def get30minData(self, timestamp):
-        return self.cur.execute("seletc * from last60min where time between ? and ?;", (timestamp - 30 * 60, timestamp))
+        cursor = self.cur.execute("seletc * from last60min where time between ? and ?;", (timestamp - 30 * 60, timestamp))
+        temp = 0.0
+        humi = 0.0
+        count = 0
+        for row in cursor:
+            temp = temp + float(row[1])
+            humi = humi + float(row[2])
+            count = count + 1
+        temp = temp / count
+        humi = humi / count
+        return [temp, humi]

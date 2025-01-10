@@ -46,19 +46,11 @@ class DataProcessor:
                 sleep(1)
 
             # 分针归0或30自动保存长期数据
-            if (curTime.minute == 0 or curTime.minute == 30) and curTime.second == 0:
+            if (curTime.minute % 5 == 0) and curTime.second == 0:
                 with self.sqliteLock:
-                    cursor = self.sqliteConnector.get30minData(curTime.timestamp())
-                temp = 0.0
-                humi = 0.0
-                count = 0
-                for row in cursor:
-                    temp = temp + row[1]
-                    humi = humi + row[2]
-                    count = count + 1
-                temp = temp / count
-                humi = humi / count
+                    datas = self.sqliteConnector.get30minData(curTime.timestamp())
+
                 with self.sqliteLock:
-                    self.sqliteConnector.save24hData(curTime, temp, humi)
+                    self.sqliteConnector.save24hData(curTime, datas[0], datas[1])
                 sleep(1)
             sleep(0.1)
